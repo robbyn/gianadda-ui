@@ -16,11 +16,8 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            InputStream in = new FileInputStream("logging.properties");
-            try {
+            try (InputStream in = new FileInputStream("logging.properties")) {
                 LogManager.getLogManager().readConfiguration(in);
-            } finally {
-                in.close();
             }
             Configuration conf = Configuration.load(
                     new File("gianadda-ui.properties"));
