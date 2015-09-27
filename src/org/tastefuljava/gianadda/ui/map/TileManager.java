@@ -6,7 +6,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import org.tastefuljava.gianadda.geo.LatLng;
@@ -25,6 +29,8 @@ import org.tastefuljava.gianadda.util.Util;
 public class TileManager implements Closeable {
     private static final Logger LOG
             = Logger.getLogger(TileManager.class.getName());
+    private static final Pattern VAR_PATTERN
+            = Pattern.compile("\\{([-_A-Za-z0-9]+)\\}");
 
     private final Configuration conf;
     private final File baseDir;
@@ -45,11 +51,9 @@ public class TileManager implements Closeable {
                     System.getProperty("user.home"), ".gianadda-ui");
             baseDir = new File(confDir, "tiles");
         }
-        if (!baseDir.isDirectory() && !baseDir.mkdirs()) {
-            throw new IOException("Could not create dir " + this.baseDir);
-        }
         tileSize = conf.getDimension("tiles.tile-size", new Dimension(256,256));
         requestQueue = new LinkedBlockingQueue<>();
+        ensureDirExists(baseDir);
     }
 
     @Override
@@ -207,6 +211,12 @@ public class TileManager implements Closeable {
         return new File(dir, tileName(col, row));
     }
 
+    private synchronized void ensureDirExists(File dir) throws IOException {
+        if (!dir.isDirectory() && !dir.mkdirs()) {
+            throw new IOException("Could not create directory " + dir);
+        }
+    }
+
     private TileServer[] createServers() {
         List<TileServer> list = new ArrayList<>();
         String s = conf.getString("tiles.server", null);
@@ -273,16 +283,13 @@ public class TileManager implements Closeable {
         }
 
         private void processRequest(final TileRequest req) throws IOException {
-            String surl = MessageFormat.format(
-                    pattern, req.zoom, req.col, req.row);
+            String surl = makeUrl(req);
             LOG.log(Level.INFO, "Downloading c={0}, r={1}, z={2}: [{3}]",
                     new Object[]{req.col, req.row, req.zoom, surl});
             URL url = new URL(surl);
             try (InputStream in = url.openStream()) {
                 File dir = tileDir(req.zoom);
-                if (!dir.isDirectory() && !dir.mkdirs()) {
-                    throw new IOException("Could not create directory " + dir);
-                }
+                ensureDirExists(dir);
                 File tmp = File.createTempFile("til", null, dir);
                 Files.save(in, tmp);
                 final File file = tileFile(req.zoom, req.col, req.row);
@@ -297,6 +304,26 @@ public class TileManager implements Closeable {
                     }
                 });
             }
+        }
+
+        private String makeUrl(TileRequest req) {
+            Matcher matcher = VAR_PATTERN.matcher(pattern);
+            StringBuffer sb = new StringBuffer();
+            while (matcher.find()) {
+                String var = matcher.group(1);
+                Object val = null;
+                try {
+                    Field f = TileRequest.class.getDeclaredField(var);
+                    val = f.get(req);
+                } catch (NoSuchFieldException | SecurityException
+                        | IllegalAccessException ex) {
+                    LOG.log(Level.SEVERE, null, ex);
+                }
+                matcher.appendReplacement(sb, val == null 
+                        ? var : val.toString());
+            }
+            matcher.appendTail(sb);
+            return sb.toString();
         }
     }
 }

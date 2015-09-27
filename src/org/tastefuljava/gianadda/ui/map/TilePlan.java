@@ -57,8 +57,8 @@ public class TilePlan implements Closeable, TileListener {
         return manager.lng2x(lng, zoom);
     }
 
-    public int lat2y(double lng) {
-        return manager.lng2x(lng, zoom);
+    public int lat2y(double lat) {
+        return manager.lat2y(lat, zoom);
     }
 
     public double x2lng(int x) {

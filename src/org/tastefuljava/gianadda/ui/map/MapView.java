@@ -50,7 +50,7 @@ public class MapView extends JComponent implements TileListener {
             int x = plan.lng2x(lng);
             int y = plan.lat2y(lat);
             left = x - getWidth()/2;
-            top = x - getHeight()/2;
+            top = y - getHeight()/2;
         }
         refresh();
     }
