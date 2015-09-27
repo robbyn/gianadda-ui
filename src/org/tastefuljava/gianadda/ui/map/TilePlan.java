@@ -12,13 +12,13 @@ public class TilePlan implements Closeable, TileListener {
     private final TileListener notifier
             = listeners.getNotifier(TileListener.class);
 
-    public TilePlan create(TileManager manager, int zoom) {
+    public static TilePlan create(TileManager manager, int zoom) {
         TilePlan plan = new TilePlan(manager, zoom);
         manager.addListener(plan);
         return plan;
     }
 
-    TilePlan(TileManager manager, int zoom) {
+    private TilePlan(TileManager manager, int zoom) {
         if (manager == null) {
             throw new IllegalArgumentException("Manager cannot be null");
         } else if (zoom < 0 || zoom > 19) {

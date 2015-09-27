@@ -104,7 +104,7 @@ public class MapView extends JComponent implements TileListener {
 
     private void setupPlan() {
         if (manager != null) {
-            plan = new TilePlan(manager, zoom);
+            plan = TilePlan.create(manager, zoom);
             plan.addListener(this);
         }
     }
@@ -124,19 +124,20 @@ public class MapView extends JComponent implements TileListener {
     @Override
     public void tileLoaded(int zoom, int col, int row) {
         if (manager != null && plan != null) {
-            int tw = manager.getTileWidth();
-            int th = manager.getTileHeight();
-            int tl = row*tw - left;
-            int tt = col*th - top;
-            int tr = tl + tw;
-            int tb = tt + th;
-            tl = Math.max(0, tl);
-            tr = Math.min(getWidth(), tr);
-            tt = Math.max(0, tt);
-            tb = Math.min(getHeight(), tb);
-            if (tl < tr && tt < tb) {
-                repaint(tl, tt, tr-tl, tb-tt);
-            }
+            repaint();
+//            int tw = manager.getTileWidth();
+//            int th = manager.getTileHeight();
+//            int tl = row*tw - left;
+//            int tt = col*th - top;
+//            int tr = tl + tw;
+//            int tb = tt + th;
+//            tl = Math.max(0, tl);
+//            tr = Math.min(getWidth(), tr);
+//            tt = Math.max(0, tt);
+//            tb = Math.min(getHeight(), tb);
+//            if (tl < tr && tt < tb) {
+//                repaint(tl, tt, tr-tl, tb-tt);
+//            }
         }
     }
 
