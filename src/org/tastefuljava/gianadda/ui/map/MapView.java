@@ -126,9 +126,9 @@ public class MapView extends JComponent implements TileListener {
 
     @Override
     public void tileLoaded(int zoom, int col, int row) {
-        if (manager != null && plan != null) {
-            int tw = manager.getTileWidth();
-            int th = manager.getTileHeight();
+        if (plan != null) {
+            int tw = plan.getTileWidth();
+            int th = plan.getTileHeight();
             int tl = col*tw - left;
             int tt = row*th - top;
             int tr = tl + tw;
@@ -149,20 +149,21 @@ public class MapView extends JComponent implements TileListener {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (manager != null && plan != null) {
+        if (plan != null) {
             Rectangle rc = g.getClipBounds();
             int x = rc.x+left;
             int y = rc.y+top;
             int w = rc.width;
             int h = rc.height;
-            int tw = manager.getTileWidth();
-            int th = manager.getTileHeight();
-            int startCol = Math.max(0, x/tw);
-            int endCol = Math.min(plan.getColumns(), (x+w+tw-1)/tw);
+            int tw = plan.getTileWidth();
+            int th = plan.getTileHeight();
+            int nx = plan.normalizeX(x);
+            int startCol = nx/tw;
+            int endCol = (nx+w+tw-1)/tw;
             int startRow = Math.max(0, y/th);
             int endRow = Math.min(plan.getRows(), (y+h+th-1)/th);
             for (int c = startCol; c < endCol; ++c) {
-                int tx = c*th - left;
+                int tx = (c%plan.getColumns())*th - left;
                 for (int r = startRow; r < endRow; ++r) {
                     int ty = r*tw - top;
                     try {

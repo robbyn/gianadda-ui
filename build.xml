@@ -70,4 +70,9 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="cleanup" description="Delete OS Crap">
+        <delete>
+            <fileset dir="." includes="**/.DS_Store" defaultexcludes="false"/>
+        </delete>
+    </target>
 </project>

@@ -11,6 +11,10 @@ public class TilePlan implements Closeable, TileListener {
     private final ListenerList listeners = new ListenerList();
     private final TileListener notifier
             = listeners.getNotifier(TileListener.class);
+    private final int rows;
+    private final int columns;
+    private final int width;
+    private final int height;
 
     public static TilePlan create(TileManager manager, int zoom) {
         TilePlan plan = new TilePlan(manager, zoom);
@@ -26,6 +30,10 @@ public class TilePlan implements Closeable, TileListener {
         }
         this.manager = manager;
         this.zoom = zoom;
+        columns = manager.getColumns(zoom);
+        rows = manager.getRows(zoom);
+        width = columns*manager.getTileWidth();
+        height = rows*manager.getTileHeight();
     }
 
     @Override
@@ -37,20 +45,28 @@ public class TilePlan implements Closeable, TileListener {
         return zoom;
     }
 
+    public int getTileWidth() {
+        return manager.getTileWidth();
+    }
+
+    public int getTileHeight() {
+        return manager.getTileHeight();
+    }
+
     public int getRows() {
-        return manager.getRows(zoom);
+        return rows;
     }
 
     public int getColumns() {
-        return manager.getColumns(zoom);
+        return columns;
     }
 
     public int getWidth() {
-        return getColumns()*manager.getTileWidth();
+        return width;
     }
 
     public int getHeight() {
-        return getRows()*manager.getTileHeight();
+        return height;
     }
 
     public int lng2x(double lng) {
@@ -67,6 +83,21 @@ public class TilePlan implements Closeable, TileListener {
 
     public double y2lat(int y) {
         return manager.y2lat(y, zoom);
+    }
+
+    public int normalizeX(int x) {
+        int r = x%width;
+        return r < 0 ? r + width : r;
+    }
+
+    public int normalizeY(int y) {
+        if (y < 0) {
+            return 0;
+        }
+        if (y >= height) {
+            return height-1;
+        }
+        return y;
     }
 
     public void addListener(TileListener listener) {

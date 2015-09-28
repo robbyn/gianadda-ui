@@ -34,7 +34,8 @@ public class TileManager implements Closeable {
 
     private final Configuration conf;
     private final File baseDir;
-    private final Dimension tileSize;
+    private final int tileWidth;
+    private final int tileHeight;
     private final BlockingQueue<TileRequest> requestQueue;
     private final ListenerList listeners = new ListenerList();
     private final TileListener notifier
@@ -51,7 +52,10 @@ public class TileManager implements Closeable {
                     System.getProperty("user.home"), ".gianadda-ui");
             baseDir = new File(confDir, "tiles");
         }
-        tileSize = conf.getDimension("tiles.tile-size", new Dimension(256,256));
+        Dimension tileSize = conf.getDimension(
+                "tiles.tile-size", new Dimension(256,256));
+        tileWidth = tileSize.width;
+        tileHeight = tileSize.height;
         requestQueue = new LinkedBlockingQueue<>();
         ensureDirExists(baseDir);
     }
@@ -70,15 +74,15 @@ public class TileManager implements Closeable {
     }
 
     public int getTileWidth() {
-        return tileSize.width;
+        return tileWidth;
     }
 
     public int getTileHeight() {
-        return tileSize.height;
+        return tileHeight;
     }
 
     public Dimension getTileSize() {
-        return new Dimension(tileSize);
+        return new Dimension(tileWidth, tileHeight);
     }
 
     public int getRows(int zoom) {
