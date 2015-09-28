@@ -1,5 +1,6 @@
 package org.tastefuljava.gianadda.ui.map;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import org.tastefuljava.gianadda.geo.TrackPoint;
 
 public class MapView extends JComponent implements TileListener {
     private static final Logger LOG = Logger.getLogger(MapView.class.getName());
@@ -21,6 +23,7 @@ public class MapView extends JComponent implements TileListener {
 
     public MapView() {
         enableEvents(ComponentEvent.COMPONENT_EVENT_MASK);
+        setMinimumSize(new Dimension(256, 256));
     }
 
     public TileManager getManager() {
@@ -181,5 +184,9 @@ public class MapView extends JComponent implements TileListener {
                 && e.getID() == ComponentEvent.COMPONENT_RESIZED) {
             refresh();
         }
+    }
+
+    public void addTrack(TrackPoint[] points) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
