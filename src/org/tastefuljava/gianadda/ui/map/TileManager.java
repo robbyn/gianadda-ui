@@ -1,6 +1,7 @@
 package org.tastefuljava.gianadda.ui.map;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.Closeable;
 import java.io.File;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import org.tastefuljava.gianadda.geo.LatLng;
+import org.tastefuljava.gianadda.geo.LatLngBounds;
 import org.tastefuljava.gianadda.ui.util.ListenerList;
 import org.tastefuljava.gianadda.util.Configuration;
 import org.tastefuljava.gianadda.util.Files;
@@ -125,6 +127,14 @@ public class TileManager implements Closeable {
         }
         double fx = ratio * w;
         return (int)fx;
+    }
+
+    public Rectangle bounds2rect(LatLngBounds bounds, int zoom) {
+        int xmin = lng2x(bounds.getWest(), zoom);
+        int xmax = lng2x(bounds.getEast(), zoom);
+        int ymin = lat2y(bounds.getNorth(), zoom);
+        int ymax = lat2y(bounds.getSouth(), zoom);
+        return new Rectangle(xmin, ymin, xmax-xmin, ymax-ymin);
     }
 
     public double x2lng(int x, int zoom) {

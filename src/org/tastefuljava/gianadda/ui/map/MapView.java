@@ -188,38 +188,31 @@ public class MapView extends JComponent implements TileListener {
         }
     }
 
-    public void addTrack(TrackPoint[] points) {
+    public void fitBounds(LatLngBounds bounds) {
         if (manager != null) {
-            LatLngBounds bounds = LatLngBounds.build(points);
-            double n = bounds.getNorth();
-            double s = bounds.getSouth();
-            double w = bounds.getWest();
-            double e = bounds.getEast();
-            int xmin = manager.lng2x(w, 0);
-            int xmax = manager.lng2x(e, 0);
-            int ymin = manager.lat2y(n, 0);
-            int ymax = manager.lat2y(s, 0);
+            Rectangle rc = manager.bounds2rect(bounds, 0);
             int z = 0;
             do {
                 ++z;
-                int xn = manager.lng2x(w, z);
-                int xx = manager.lng2x(e, z);
-                int yn = manager.lat2y(n, z);
-                int yx = manager.lat2y(s, z);
-                if (xx-xn > getWidth() || yx-yn > getHeight()) {
+                Rectangle r = manager.bounds2rect(bounds, z);
+                if (r.width > getWidth() || r.height > getHeight()) {
                     break;
                 }
-                xmin = xn;
-                xmax = xx;
-                ymin = yn;
-                ymax = yx;
+                rc = r;
             } while (z < 20);
             --z;
             zoom = z;
-            left = (xmin+xmax-getWidth())/2;
-            top = (ymin+ymax-getHeight())/2;
+            left = rc.x+(rc.width-getWidth())/2;
+            top = rc.y+(rc.height-getHeight())/2;
             checkPlan();
             refresh();
+        }
+    }
+
+    public void addTrack(TrackPoint[] points) {
+        if (manager != null) {
+            LatLngBounds bounds = LatLngBounds.build(points);
+            fitBounds(bounds);
         }
     }
 }
