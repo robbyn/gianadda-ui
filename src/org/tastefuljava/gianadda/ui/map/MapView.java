@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import org.tastefuljava.gianadda.geo.LatLngBounds;
 import org.tastefuljava.gianadda.geo.TrackPoint;
 
 public class MapView extends JComponent implements TileListener {
@@ -188,6 +189,37 @@ public class MapView extends JComponent implements TileListener {
     }
 
     public void addTrack(TrackPoint[] points) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (manager != null) {
+            LatLngBounds bounds = LatLngBounds.build(points);
+            double n = bounds.getNorth();
+            double s = bounds.getSouth();
+            double w = bounds.getWest();
+            double e = bounds.getEast();
+            int xmin = manager.lng2x(w, 0);
+            int xmax = manager.lng2x(e, 0);
+            int ymin = manager.lat2y(n, 0);
+            int ymax = manager.lat2y(s, 0);
+            int z = 0;
+            do {
+                ++z;
+                int xn = manager.lng2x(w, z);
+                int xx = manager.lng2x(e, z);
+                int yn = manager.lat2y(n, z);
+                int yx = manager.lat2y(s, z);
+                if (xx-xn > getWidth() || yx-yn > getHeight()) {
+                    break;
+                }
+                xmin = xn;
+                xmax = xx;
+                ymin = yn;
+                ymax = yx;
+            } while (z < 20);
+            --z;
+            zoom = z;
+            left = (xmin+xmax-getWidth())/2;
+            top = (ymin+ymax-getHeight())/2;
+            checkPlan();
+            refresh();
+        }
     }
 }
